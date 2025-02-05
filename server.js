@@ -3,12 +3,18 @@ require('dotenv').config();
 const express     = require('express');
 const bodyParser  = require('body-parser');
 const cors        = require('cors');
+const helmet      = require('helmet');
 
 const apiRoutes         = require('./routes/api.js');
 const fccTestingRoutes  = require('./routes/fcctesting.js');
 const runner            = require('./test-runner');
 
+// new dependencies
+require('./db-connection.js');
+
 const app = express();
+
+
 
 app.use('/public', express.static(process.cwd() + '/public'));
 
@@ -16,6 +22,23 @@ app.use(cors({origin: '*'})); //For FCC testing purposes only
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "code.jquery.com"],
+      styleSrc: ["'self'", "fonts.googleapis.com"],
+      fontSrc: ["'self'", "fonts.gstatic.com"],
+      imgSrc: ["'self'", "hyperdev.com", "glitch.com"],
+      sandbox: ['allow-forms', 'allow-scripts'],
+      reportUri: '/report-violation',
+      objectSrc: ["'none'"],
+      upgradeInsecureRequests: true,
+      workerSrc: false  // This is not set.
+    },
+  },
+}));
+
 
 //Index page (static HTML)
 app.route('/')
